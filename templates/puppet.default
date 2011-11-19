@@ -1,0 +1,8 @@
+#CONTROLLED BY PUPPET
+# Defaults for puppet - sourced by /etc/init.d/puppet
+
+# Start puppet on boot?
+START=no
+
+# Startup options
+DAEMON_OPTS="-w 0"

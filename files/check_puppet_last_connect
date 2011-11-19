@@ -1,0 +1,22 @@
+#!/bin/bash
+
+CONNECT=`cat /var/lib/puppet/state/last_pm_connect`
+LAST=`date -d "$CONNECT" +%s`;
+NOW=`date +%s`
+
+LEVEL_CRITICAL="30";
+LEVEL_WARNING="2";
+
+DIFF=$(( ( $NOW - $LAST ) / 86400))
+
+echo -n "Last Puppet check $DIFF days ago.";
+
+if [ "$DIFF" -gt "$LEVEL_CRITICAL" ]
+then
+    exit 2;
+elif [ "$DIFF" -gt "$LEVEL_WARNING" ]
+then
+    exit 1;
+else
+    exit 0;
+fi

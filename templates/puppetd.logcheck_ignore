@@ -1,0 +1,15 @@
+## MANAGED BY PUPPET!
+
+#
+# Note that ( ), [ ], "", - (within []), all have special meaning and must be escaped.
+#
+
+#filter out any puppetd warnings. We now view the email reports of puppet runs
+^\w{3} [ :0-9]{11} [[:alnum:]\.]+ puppetd\[[0-9]+\].+
+^\w{3} [ :0-9]{11} [[:alnum:]\.]+ puppetd\[[0-9]+\]: Starting configuration run$
+^\w{3} [ :0-9]{11} [[:alnum:]\.]+ puppetd\[[0-9]+\]: Finished configuration run in [0-9\.]+ seconds$
+
+# Ignore noop messages, as these are generated /frequently/
+^\w{3} [ :0-9]{11} \w+ puppetd\[[0-9]+\]: .+ \(noop\)$
+# ignore checksum updates on the fact dir..
+^notice.+collector.+facts]/checksum:.+$

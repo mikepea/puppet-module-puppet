@@ -1,0 +1,30 @@
+# Defaults for puppetmaster - sourced by /etc/init.d/puppet
+
+# Start puppet on boot?
+<% if has_variable?('puppetmaster_servertype') and puppetmaster_servertype == 'passenger' %>
+START=no
+<% elsif has_variable?('puppetmaster_servertype') and puppetmaster_servertype %>
+START=yes
+<% else %>
+START=no
+<% end %>
+
+# Startup options
+DAEMON_OPTS=""
+
+<% if has_variable?('puppetmaster_servertype') and puppetmaster_servertype == 'passenger' %>
+# Passenger-based puppetmaster, no setup needed.
+<% elsif has_variable?('puppetmaster_servertype') and puppetmaster_servertype == 'mongrel' %>
+# Mongrel setup:
+SERVERTYPE=mongrel
+PUPPETMASTERS=<%= puppetmasters %>
+# PUPPETMASTERS is set to a number greater than 1, then the port for
+# the first puppetmaster will be set to the port listed below, and
+# further instances will be incremented by one 
+PORT=<%= puppetmaster_port %>
+<% else %>
+# WEBrick setup:
+SERVERTYPE=webrick
+PUPPETMASTERS=1
+PORT=<%= puppetmaster_port %>
+<% end %>

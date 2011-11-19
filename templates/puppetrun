@@ -1,0 +1,55 @@
+#!/bin/bash
+
+NAME=$( hostname -s )
+MAIL_BIN=$( which mail )
+PUPPET_ARGS="--no-daemonize"
+
+filter_puppet_output() {
+
+        if [[ -n "$SLEEP" ]]; then
+		sleep $(( $RANDOM * $SLEEP / 31268 ))
+      	fi
+        /usr/sbin/puppetd -v -o --color false $PUPPET_ARGS 2>&1 |
+        grep -v '^info' |
+        grep -v '^notice: Starting configuration run' |
+        grep -v '^warning: Other end went away\; restarting connection and retrying' |
+        egrep -v "^notice: .+ defined 'monthday' as" |
+        grep -v 'uname --help' |
+        sed 's/^notice: .*Exec\[diff.*\/returns:/  /' |
+        grep -v 'fork terminates thread' |
+        grep -v '\/fact_collector\/File\[\/var\/lib\/puppet\/facts\]\/checksum' |
+        grep -v '^notice: Finished configuration run in [.0-9]* seconds' |
+        grep -v '/var/lib/puppet/state/last_pm_connect' |
+        grep -v 'ocsinv.conf'
+}
+
+if [[ $1 == "--noop" ]]; then
+    # '--logdest /dev/null' as we get a lot of annoying 'content is'
+    # crap going to syslog if we don't. We don't care about syslogging
+    # noop puppet work, just real stuff.
+    PUPPET_ARGS="--noop --tags '' --logdest /dev/null"
+    MAIL_SUBJ='Puppet --noop report for'
+    shift
+elif [[ $1 == "--show_diff" ]]; then
+    PUPPET_ARGS="--tags 'show_diff' --logdest /dev/null"
+    MAIL_SUBJ='Puppet show_diff report for'
+    shift
+else
+    MAIL_SUBJ="Puppet run for"
+fi
+
+if [[ "$1" ]]; then
+    EMAIL=$1
+fi
+
+if [[ "$2" ]]; then
+    SLEEP=$2
+fi
+
+if [[ -n $EMAIL ]]; then
+    output=`filter_puppet_output`
+    [[ -n "$output" ]] && echo "$output" | $MAIL_BIN -s "$MAIL_SUBJ $HOSTNAME" $EMAIL
+else
+    filter_puppet_output
+fi
+

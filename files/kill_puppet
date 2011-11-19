@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ -f /var/lib/puppet/state/puppetdlock ]; then
+    kill -9 `cat /var/lib/puppet/state/puppetdlock`
+fi
