@@ -27,7 +27,7 @@ class puppet::puppetmaster {
             },
             ensure => running,
             enable => false,
-            require => Class["puppet::service"],
+            require => Class["puppet"],
         }
     }
 
@@ -60,10 +60,6 @@ class puppet::puppetmaster {
    # }
 
     include puppet::puppetmaster::logcheck
-
-    include mcollective::plugin::puppetca
-
-    include nfs_mounts::brighton_product
 
 }
 
