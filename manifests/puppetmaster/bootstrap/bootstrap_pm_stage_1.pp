@@ -1,6 +1,23 @@
 
 File { owner => root, group => root }
 
+define git_clone (
+            $module_name,
+            $repo,
+            $cwd = "/var/lib/puppet/modules",
+            $path = "/bin:/usr/bin"
+	) {
+    exec { "git_clone_${module_name}":
+        path => $path,
+        require => Package['git-core'],
+        cwd => $cwd,
+        command => "git clone ${repo} ${module_name}",
+        unless => "test -d ${cwd}/${module_name}",
+        user => 'puppvcs',
+        group => 'puppvcs',
+    }
+}
+
 package { "pwgen": }
 package { "git-core": }
 package { "puppetmaster": }
@@ -21,14 +38,14 @@ file { "/home/puppvcs":
     owner => puppvcs,
 }
 
-exec { "vcsrepo-git":
-	path => "/bin:/usr/bin",
-	require => Package['git-core'],
-	cwd => '/var/lib/puppet/modules',
-	command => 'git clone git://github.com/puppetlabs/puppet-vcsrepo.git vcsrepo',
-	unless => 'test -d /var/lib/puppet/modules/vcsrepo',
-	user => 'puppvcs',
-	group => 'puppvcs',
+git_clone { "puppetlabs-vcsrepo":
+    module_name => "vcsrepo",
+    repo => 'git://github.com/puppetlabs/puppet-vcsrepo.git',
+}
+
+git_clone { "mikepea-puppet":
+    module_name => "puppet",
+    repo => 'git://github.com/mikepea/puppet-module-puppet.git',
 }
 
 file { "/var/lib/puppet/fileserver":
@@ -36,7 +53,7 @@ file { "/var/lib/puppet/fileserver":
 	mode => 2750,
 	owner => puppvcs,
 	group => puppet,
-	before => Exec["checkout_puppet_modules"],
+	#before => Exec["checkout_puppet_modules"],
 }
 
 file { "/var/lib/puppet/modules":
@@ -44,7 +61,7 @@ file { "/var/lib/puppet/modules":
 	mode => 2750,
 	owner => puppvcs,
 	group => puppet,
-	before => Exec["checkout_puppet_modules"],
+	#before => Exec["checkout_puppet_modules"],
 }
 
 file { "/etc/puppet/manifests":
@@ -52,7 +69,7 @@ file { "/etc/puppet/manifests":
 	mode => 2750,
 	owner => puppvcs,
 	group => puppet,
-	before => Exec["checkout_puppet_modules"],
+	#before => Exec["checkout_puppet_modules"],
 }
 
 file { "/etc/puppet/manifests/nodes":

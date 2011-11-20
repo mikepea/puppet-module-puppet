@@ -15,32 +15,6 @@ class puppet::puppetmaster {
         redhat: { package { puppet-server: ensure => present, } }
     }
 
-    #required for       metrics storing
-    package { "rrdtool" : ensure => present}
-    package { "librrd2-dev" : ensure => present}
-
-    #might need to use patched gem files/RubyRRDtool-0.6.0.gem
-    #Provide rrdtool.so bindings to the rrdtool file
-    #MP# Requires RubyGems 1.4+, which ain't happening...
-    #MP#package { "auxesis-RubyRRDtool":
-    #MP#    provider => "gem" ,
-    #MP#    ensure => present,
-    #MP#}
-    
-    case $architecture {
-        "i386": { $ruby_arch="i486-linux"}
-        "amd64":{ $ruby_arch="x86_64-linux"}
-    }
-    
-    #is this still required?
-    file { "/usr/lib/ruby/1.8/${ruby_arch}/RRDtool.so":
-        content => file("${f_dir}/RRDtool.so"),
-    }
-    
-    file { "/usr/lib/ruby/1.8/${ruby_arch}/RRD.so":
-        content => file("${f_dir}/RRD.so"),
-    }
-
     # User for managing getting manifests et al from VCS (svn, git...)
     realize Group['puppvcs']
     realize User['puppvcs']
@@ -58,7 +32,7 @@ class puppet::puppetmaster {
     }
 
     case $environment {
-        development: {    
+        development: {
             #list of domains that we autosign cerificates for.
             file { "/etc/puppet/autosign.conf":
                 content => template("puppet/autosign.conf"),
@@ -66,9 +40,9 @@ class puppet::puppetmaster {
                 group => puppet,
             }
         }
-        testing: {  #use another mechanism http://www.devco.net/archives/2010/07/14/bootstrapping_puppet_on_ec2_with_mcollective.php  
+        testing: {  #use another mechanism http://www.devco.net/archives/2010/07/14/bootstrapping_puppet_on_ec2_with_mcollective.php
         }
-        production: { #use another mechanism http://www.devco.net/archives/2010/07/14/bootstrapping_puppet_on_ec2_with_mcollective.php  
+        production: { #use another mechanism http://www.devco.net/archives/2010/07/14/bootstrapping_puppet_on_ec2_with_mcollective.php
         }
     }
 
