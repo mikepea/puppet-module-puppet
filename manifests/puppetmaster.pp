@@ -52,11 +52,6 @@ class puppet::puppetmaster {
         content => template('puppet/fileserver.conf'),
     }
 
-    file { "/opt/semantico/bin/puppet_manifest_update":
-        mode    => 0555,
-        content => file("${f_dir}/puppet_manifest_update"),
-    }
-
    # cron { "puppet_manifest_update":
    #     command => "sudo -i -u puppvcs /opt/semantico/bin/puppet_manifest_update",
    #     user => root,
